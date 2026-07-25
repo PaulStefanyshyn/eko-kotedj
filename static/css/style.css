@@ -928,6 +928,54 @@ textarea {
     transform: translateY(0);
 }
 
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.dropdown-btn {
+    width: 250px;
+    padding: 10px;
+    cursor: pointer;
+}
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    width: 250px;
+    background: white;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    padding: 10px;
+    z-index: 10;
+}
+
+.dropdown-content label {
+    display: block;
+    margin: 6px 0;
+}
+
+.dropdown.open .dropdown-content {
+    display: block;
+}
+
+.dropdown.open .dropdown-content label{
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+    width: fit-content;
+    white-space: nowrap;
+}
+
+.about-layout{
+    margin-bottom: 60px;
+}
+
+.about-layout:last-child{
+    margin-bottom: 0;
+}
+
 @media (max-width: 1060px) {
     .menu-toggle {
         display: block;

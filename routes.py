@@ -16,7 +16,7 @@ from flask import (
 )
 from werkzeug.utils import secure_filename
 
-from models import Admin, Booking, CabinImage, GalleryImage, HeroImage, db
+from models import Admin, Booking, CabinImage, GalleryImage, HeroImage, Home, db
 
 
 main_bp = Blueprint("main", __name__)
@@ -120,10 +120,26 @@ def get_home_images():
 @main_bp.route("/")
 def index():
     images = get_home_images()
+
+    ICON_MAP = {
+        "Камін": "icon-fire",
+        "Wi-Fi": "icon-wifi",
+        "Парковка": "icon-car",
+        "Мангал": "icon-fire",
+        "Джакузі": "icon-bath",
+        "Тераса": "icon-tree",
+        "Кухня": "icon-kitchen",
+        "Кондиціонер": "icon-snow",
+    }
+
+    home = Home.query.all()
+
     return render_template(
         "index.html",
         blocked_dates=get_blocked_dates(),
         **images,
+        icon_map=ICON_MAP,
+        home=home,
     )
 
 
@@ -270,6 +286,36 @@ def add_manual_booking():
     return redirect(url_for("main.admin_dashboard"))
 
 
+@main_bp.post("/admin/manual-home")
+@login_required
+def add_manual_home():
+    name = request.form.get("name")
+    description = request.form.get("description")
+    daily_price = request.form.get("daily_price")
+
+    if not name or not description or not daily_price:
+        flash("Заповніть всі поля name.", "error")
+        return redirect(url_for("main.admin_dashboard"))
+    
+    holiday_price = request.form.get("holiday_price")
+    amenities = ", ".join(request.form.getlist("amenities"))
+
+    if not holiday_price:
+        holiday_price = daily_price
+
+    home = Home(
+        name=name,
+        description=description,
+        daily_price=daily_price,
+        holiday_price=holiday_price,  
+        amenities=amenities,      
+    )
+    db.session.add(home)
+    db.session.commit()
+    flash("Хатинку додано успішно.", "success")
+    return redirect(url_for("main.admin_dashboard"))
+
+
 @main_bp.post("/admin/upload/<image_type>")
 @login_required
 def upload_image(image_type):
@@ -296,6 +342,8 @@ def upload_image(image_type):
     if image_type == "hero":
         HeroImage.query.update({"is_active": False})
         image = image_model(image_path=image_path, alt_text=request.form.get("alt_text") or "Гори біля хатинки")
+    elif image_type == "cabin":
+        image = image_model(image_path=image_path, alt_text=request.form.get("alt_text") or "Фото хатинки", home_id=request.form.get("id"))
     else:
         image = image_model(image_path=image_path, alt_text=request.form.get("alt_text") or "Фото хатинки")
 
