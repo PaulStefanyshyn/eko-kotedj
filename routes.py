@@ -76,13 +76,19 @@ def dates_are_available(check_in, check_out, ignore_booking_id=None):
 
 def get_blocked_dates():
     bookings = Booking.query.filter(Booking.status.in_(["confirmed", "blocked"])).all()
-    unavailable_dates = set()
+    unavailable_dates = {}
 
     for booking in bookings:
-        for day in date_range(booking.check_in, booking.check_out):
-            unavailable_dates.add(day.isoformat())
+        if booking.home_id not in unavailable_dates:
+            unavailable_dates[booking.home_id] = set()
 
-    return sorted(unavailable_dates)
+        for day in date_range(booking.check_in, booking.check_out):
+            unavailable_dates[booking.home_id].add(day.isoformat())
+
+    return {
+        home_id: sorted(dates)
+        for home_id, dates in unavailable_dates.items()
+    }
 
 
 def allowed_file(filename):
@@ -178,6 +184,7 @@ def booking():
             check_in=check_in,
             check_out=check_out,
             comment=form.get("comment", "").strip() or None,
+            home_id=form.get("home_id"),
         )
         db.session.add(new_booking)
         db.session.commit()
@@ -236,9 +243,9 @@ def admin_dashboard():
     )
 
 
-@main_bp.post("/admin/bookings/<int:booking_id>/<status>")
+@main_bp.post("/admin/bookings/<int:booking_id>/<status>/<int:home>")
 @login_required
-def update_booking_status(booking_id, status):
+def update_booking_status(booking_id, status, home):
     if status not in {"confirmed", "cancelled", "pending"}:
         flash("Невідомий статус бронювання.", "error")
         return redirect(url_for("main.admin_dashboard"))
@@ -279,6 +286,7 @@ def add_manual_booking():
         status="blocked",
         source="admin",
         comment=request.form.get("comment", "").strip() or "Додано вручну",
+        home_id=request.form.get("home_id")
     )
     db.session.add(booking)
     db.session.commit()

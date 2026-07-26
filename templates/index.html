@@ -59,9 +59,35 @@
                 {% endfor %}
             </div>
 
-            <a class="primary-button" href="#availability">Забронювати</a>
+            <a class="primary-button home-reservation-btn" href="#availability" data-id="{{ homes.id }}">Забронювати</a>
         </article>
     </div>
+
+    <section class="section availability-section reveal" id="availability">
+        <div class="section-heading centered">
+            <p class="eyebrow">Доступність</p>
+            <h2>Оберіть дати відпочинку</h2>
+            <p>Зайняті дні підсвічені в календарі та недоступні для вибору.</p>
+        </div>
+
+        <form class="calendar-card" action="{{ url_for('main.booking') }}" method="get" data-inline-calendar-form data-blocked='{{ blocked_dates.get(homes.id, [])|tojson }}'>
+            <input type="hidden" name="check_in">
+            <input type="hidden" name="check_out">
+            <input class="calendar-anchor" type="text" data-inline-calendar aria-label="Календар доступності" readonly>
+            <div class="calendar-summary">
+                <div>
+                    <span>Заїзд</span>
+                    <strong data-check-in-label>Оберіть дату</strong>
+                </div>
+                <div>
+                    <span>Виїзд</span>
+                    <strong data-check-out-label>Оберіть дату</strong>
+                </div>
+                <button class="primary-button" type="submit" disabled>Забронювати</button>
+            </div>
+        </form>
+    </section>
+    <!-- <script type="application/json" id="blocked-dates-data">{{ blocked_dates.get(homes.id, [])|tojson }}</script> -->
     {% endfor %}
 
 </section>
@@ -75,30 +101,7 @@
     </div>
 </section>
 
-<section class="section availability-section reveal" id="availability">
-    <div class="section-heading centered">
-        <p class="eyebrow">Доступність</p>
-        <h2>Оберіть дати відпочинку</h2>
-        <p>Зайняті дні підсвічені в календарі та недоступні для вибору.</p>
-    </div>
 
-    <form class="calendar-card" action="{{ url_for('main.booking') }}" method="get" data-inline-calendar-form>
-        <input type="hidden" name="check_in">
-        <input type="hidden" name="check_out">
-        <input class="calendar-anchor" type="text" data-inline-calendar aria-label="Календар доступності" readonly>
-        <div class="calendar-summary">
-            <div>
-                <span>Заїзд</span>
-                <strong data-check-in-label>Оберіть дату</strong>
-            </div>
-            <div>
-                <span>Виїзд</span>
-                <strong data-check-out-label>Оберіть дату</strong>
-            </div>
-            <button class="primary-button" type="submit" disabled>Забронювати</button>
-        </div>
-    </form>
-</section>
 
 <section class="section gallery-section reveal" id="gallery">
     <div class="section-heading">
@@ -115,4 +118,6 @@
         {% endfor %}
     </div>
 </section>
+
+<script src="{{ url_for('static', filename='js/reservation.js') }}"></script>
 {% endblock %}
