@@ -59,7 +59,7 @@
                 {% endfor %}
             </div>
 
-            <a class="primary-button home-reservation-btn" href="#availability" data-id="{{ homes.id }}">Забронювати</a>
+            <a class="primary-button home-reservation-btn" href="#availability" data-blocked='{{ blocked_dates.get(homes.id, [])|tojson }}'">Забронювати</a>
         </article>
     </div>
 

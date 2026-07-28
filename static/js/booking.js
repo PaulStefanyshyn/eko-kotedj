@@ -1,6 +1,8 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const homeId = sessionStorage.getItem('home_id');
-    if (homeId) {
-        document.getElementById('home_id').value = homeId;
+    const form = document.querySelector("[data-booking-calendar-form]");
+    const blocked = JSON.parse(sessionStorage.getItem("data-blocked") || "[]");
+    console.log("blocked: " + blocked);
+    if (blocked) {
+        form.dataset.blocked = blocked;
     }
 });
